@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evento Cultural — Aprendizes Energisa + SENAI Porto · Cuiabá</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <span class="brand-energisa">ENERGISA</span>
+      <span class="brand-sep">×</span>
+      <span class="brand-senai">SENAI</span>
+    </div>
+    <div class="nav-links">
+      <a href="#sobre">Sobre</a>
+      <a href="#cronograma">Cronograma</a>
+    </div>
+    <div class="nav-actions">
+      {% if logado %}
+        <span class="nav-user">Olá, {{ participante.nome.split()[0] }} 👋</span>
+        <a href="/feedback" class="btn-nav btn-feedback-nav">Feedback</a>
+        <a href="/logout" class="btn-nav btn-outline-nav">Sair</a>
+      {% else %}
+        <button class="btn-nav btn-primary-nav" onclick="openModal()">Inscrever-se</button>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% if msgs %}
+    <div class="flash-container">
+      {% for cat, msg in msgs %}
+        <div class="flash flash-{{ cat }}">
+          <span>{{ msg }}</span>
+          <button onclick="this.parentElement.remove()">×</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<section class="hero">
+  <div class="hero-bg">
+    <div class="chita-overlay"></div>
+    <div class="hero-gradient"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">SENAI PORTO · AUDITÓRIO · CUIABÁ – MT</div>
+    <h1 class="hero-title">Cultura<br><em>Cuiabana</em></h1>
+    <p class="hero-subtitle">
+      Um evento que une tecnologia, patrimônio e identidade.<br>
+      Palestras, danças, gastronomia e muito mais em dois dias memoráveis.
+    </p>
+    <div class="hero-cta">
+      {% if logado %}
+        <div class="hero-logged">
+          <span class="hero-logged-text">✓ Você está inscrito</span>
+          <a href="/feedback" class="btn-hero-secondary">Deixar Feedback</a>
+        </div>
+      {% else %}
+        <button class="btn-hero" onclick="openModal()">Garantir Minha Vaga</button>
+        <span class="hero-note">Acesso exclusivo com e-mail institucional</span>
+      {% endif %}
+    </div>
+    <div class="hero-scroll" onclick="document.getElementById('sobre').scrollIntoView({behavior:'smooth'})">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="section sobre" id="sobre">
+  <div class="container">
+    <div class="sobre-grid">
+      <div class="sobre-text">
+        <div class="section-label">Sobre o Evento</div>
+        <h2 class="section-title">Onde a tradição encontra o futuro</h2>
+        <p>O Evento Cultural reúne alunos e professores do SENAI Porto em uma celebração da identidade cuiabana — do Siriri ao Cururu, da culinária ao artesanato, das histórias aos saberes que moldam nossa cidade.</p>
+        <p>Organizado em parceria com o SENAI Porto e aprendizes da Energisa, o evento acontece no Auditório do SENAI Porto e promove dois dias de imersão cultural, aprendizado e conexão.</p>
+        <div class="info-chips">
+          <div class="chip"><span>📅</span> 2 dias de evento</div>
+          <div class="chip"><span>📍</span> SENAI Porto · Cuiabá</div>
+          <div class="chip"><span>🕗</span> 08:00 – 17:30</div>
+        </div>
+      </div>
+      <div class="sobre-visual">
+        <div class="visual-card vc1"><div class="vc-icon">🎭</div><div class="vc-label">Siriri &amp; Cururu</div></div>
+        <div class="visual-card vc2"><div class="vc-icon">🍳</div><div class="vc-label">Culinária</div></div>
+        <div class="visual-card vc3"><div class="vc-icon">🏺</div><div class="vc-label">Artesanato</div></div>
+        <div class="visual-card vc4"><div class="vc-icon">📜</div><div class="vc-label">História</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section cronograma" id="cronograma">
+  <div class="container">
+    <div class="section-label center">Programação Completa</div>
+    <h2 class="section-title center">Cronograma do Evento</h2>
+    <div class="schedule-tabs">
+      <button class="sched-tab active" data-day="1" onclick="switchDay(1)">DIA 01</button>
+      <button class="sched-tab" data-day="2" onclick="switchDay(2)">DIA 02</button>
+    </div>
+    <div class="schedule-grid" id="day1">
+      <div class="sched-item"><div class="sched-time">08:00 – 08:40</div><div class="sched-body"><div class="sched-tag tag-music">Música &amp; Dança</div><div class="sched-title">Palestra de Abertura</div><div class="sched-speaker">Avinner</div></div></div>
+      <div class="sched-item"><div class="sched-time">09:00 – 09:40</div><div class="sched-body"><div class="sched-tag tag-food">Culinária</div><div class="sched-title">Palestra Culinária</div><div class="sched-speaker"></div></div></div>
+      <div class="sched-item"><div class="sched-time">10:00 – 10:40</div><div class="sched-body"><div class="sched-tag tag-history">História &amp; Folclore</div><div class="sched-title">Palestra História/Folclore</div><div class="sched-speaker">Mariana Marioto</div></div></div>
+      <div class="sched-item"><div class="sched-time">11:00 – 11:30</div><div class="sched-body"><div class="sched-tag tag-craft">Artesanato</div><div class="sched-title">Palestra Artesanato</div><div class="sched-speaker">Professora Nayara</div></div></div>
+      <div class="sched-item sched-break"><div class="sched-time">12:00 – 13:00</div><div class="sched-body"><div class="sched-tag tag-break">Pausa</div><div class="sched-title">Almoço</div></div></div>
+      <div class="sched-item"><div class="sched-time">14:00 – 14:40</div><div class="sched-body"><div class="sched-tag tag-food">Culinária</div><div class="sched-title">Palestra Culinária</div><div class="sched-speaker"></div></div></div>
+      <div class="sched-item"><div class="sched-time">14:50 – 15:30</div><div class="sched-body"><div class="sched-tag tag-history">História &amp; Folclore</div><div class="sched-title">Palestra História/Folclore</div><div class="sched-speaker">Professor Rafael</div></div></div>
+      <div class="sched-item"><div class="sched-time">15:50 – 16:30</div><div class="sched-body"><div class="sched-tag tag-craft">Artesanato</div><div class="sched-title">Palestra Artesanato</div><div class="sched-speaker">Professora Nayara</div></div></div>
+      <div class="sched-item"><div class="sched-time">16:40 – 17:30</div><div class="sched-body"><div class="sched-tag tag-music">Música &amp; Dança</div><div class="sched-title">Encerramento do Dia</div><div class="sched-speaker">Avinner</div></div></div>
+    </div>
+    <div class="schedule-grid hidden" id="day2">
+      <div class="sched-item"><div class="sched-time">08:00</div><div class="sched-body"><div class="sched-tag tag-open">Abertura</div><div class="sched-title">Abertura do Evento</div><div class="sched-speaker"></div></div></div>
+      <div class="sched-item"><div class="sched-time">09:00 – 10:00</div><div class="sched-body"><div class="sched-tag tag-music">Música</div><div class="sched-title">Verificação dos Teclados</div><div class="sched-speaker">Lucianinho dos Teclados</div></div></div>
+      <div class="sched-item"><div class="sched-time">10:00 – 11:00</div><div class="sched-body"><div class="sched-tag tag-dance">Dança</div><div class="sched-title">Apresentação de Dança</div><div class="sched-speaker"></div></div></div>
+      <div class="sched-item sched-break"><div class="sched-time">11:00 – 13:00</div><div class="sched-body"><div class="sched-tag tag-break">Pausa</div><div class="sched-title">Horário de Almoço</div></div></div>
+      <div class="sched-item"><div class="sched-time">14:00 – 15:00</div><div class="sched-body"><div class="sched-tag tag-dance">Dança</div><div class="sched-title">Apresentação de Dança</div><div class="sched-speaker"></div></div></div>
+      <div class="sched-item"><div class="sched-time">15:00 – 16:00</div><div class="sched-body"><div class="sched-tag tag-music">Música</div><div class="sched-title">Apresentação de Banda</div><div class="sched-speaker"></div></div></div>
+      <div class="sched-item"><div class="sched-time">16:00 – 17:00</div><div class="sched-body"><div class="sched-tag tag-open">Encerramento</div><div class="sched-title">Encerramento do Evento</div><div class="sched-speaker"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <span class="brand-energisa">ENERGISA</span>
+      <span class="brand-sep">×</span>
+      <span class="brand-senai">SENAI</span>
+    </div>
+    <p class="footer-sub">SENAI Porto · Auditório · Cuiabá – MT</p>
+    <p class="footer-cultural">Siriri · Cururu · Viola de Cocho</p>
+  </div>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOut(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-header">
+      <h3 class="modal-title">Inscrição no Evento</h3>
+      <p class="modal-sub">Use seu e-mail institucional para confirmar presença</p>
+    </div>
+    <form method="POST" action="/registrar" class="modal-form">
+      <div class="form-group">
+        <label>Nome completo</label>
+        <input type="text" name="nome" placeholder="Seu nome completo" required>
+      </div>
+      <div class="form-group">
+        <label>E-mail institucional</label>
+        <input type="email" name="email" id="emailInput" placeholder="usuario@senai.br" required>
+        <small id="emailHint"></small>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Turma</label>
+          <input type="text" name="turma" placeholder="Ex: APB000.001" required>
+        </div>
+        <div class="form-group">
+          <label>Você é</label>
+          <select name="tipo" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="aluno">Aluno</option>
+            <option value="professor">Professor</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn-submit">Confirmar Inscrição →</button>
+    </form>
+    <p class="modal-footer-note">Aceitos: @senai.br · @aluno.senai.br · @docente.senai.br</p>
+  </div>
+</div>
+
+<script>
+function openModal(){document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
+function closeModalOut(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
+function switchDay(d){
+  document.querySelectorAll('.sched-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('[data-day="'+d+'"]').classList.add('active');
+  document.getElementById('day1').classList.toggle('hidden',d!==1);
+  document.getElementById('day2').classList.toggle('hidden',d!==2);
+}
+window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',scrollY>60));
+const ei=document.getElementById('emailInput'),eh=document.getElementById('emailHint');
+const doms=['@senai.br','@aluno.senai.br','@docente.senai.br'];
+if(ei)ei.addEventListener('input',()=>{
+  const ok=doms.some(d=>ei.value.toLowerCase().endsWith(d));
+  ei.style.borderColor=ok?'#2E7D52':'#C0603A';
+  if(eh){eh.textContent=ei.value?(ok?'✓ Domínio permitido':'Domínio não permitido'):'';eh.style.color=ok?'#2E7D52':'#C0603A';}
+});
+</script>
+</body>
+</html>

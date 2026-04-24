@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Feedback — Evento Cultural</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  <style>
+    .feedback-page { min-height:100vh; background:#0a0a0a; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; }
+    .fb-card { background:#141414; border:0.5px solid #2a2a2a; border-top:3px solid #F5A800; border-radius:16px; padding:2.5rem; max-width:520px; width:100%; }
+    .fb-card h2 { font-family:'Playfair Display',serif; color:#fff; font-size:1.6rem; margin-bottom:.3rem; }
+    .fb-card p { color:#888; font-size:.9rem; margin-bottom:2rem; }
+    .stars { display:flex; gap:12px; margin-bottom:1.5rem; }
+    .star-btn { font-size:2.2rem; background:none; border:none; cursor:pointer; color:#333; transition:color .15s,transform .15s; }
+    .star-btn:hover, .star-btn.active { color:#F5A800; transform:scale(1.15); }
+    .fb-label { color:#aaa; font-size:.8rem; font-weight:500; letter-spacing:.05em; text-transform:uppercase; display:block; margin-bottom:.4rem; }
+    .fb-textarea { width:100%; background:#0a0a0a; border:0.5px solid #333; border-radius:8px; color:#fff; padding:1rem; font-family:'DM Sans',sans-serif; font-size:.9rem; resize:vertical; min-height:120px; }
+    .fb-textarea:focus { outline:none; border-color:#F5A800; }
+    .fb-submit { width:100%; background:#F5A800; color:#0a0a0a; border:none; padding:.85rem; border-radius:8px; font-family:'DM Sans',sans-serif; font-weight:600; font-size:.95rem; cursor:pointer; margin-top:1.5rem; transition:opacity .2s; }
+    .fb-submit:hover { opacity:.88; }
+    .back-link { color:#555; text-decoration:none; font-size:.85rem; margin-top:1rem; display:block; text-align:center; transition:color .15s; }
+    .back-link:hover { color:#F5A800; }
+    input[name=nota] { display:none; }
+  </style>
+</head>
+<body>
+  <div class="feedback-page">
+    <div class="fb-card">
+      <h2>Avalie o Evento</h2>
+      <p>Olá, {{ participante.nome.split()[0] }}! Sua opinião nos ajuda a melhorar.</p>
+
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in msgs %}
+          <div class="flash flash-{{ cat }}" style="margin-bottom:1rem;">{{ msg }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST" action="/feedback" id="fbForm">
+        <input type="hidden" name="nota" id="notaInput" value="">
+        <label class="fb-label">Sua nota</label>
+        <div class="stars" id="stars">
+          <button type="button" class="star-btn" data-v="1">★</button>
+          <button type="button" class="star-btn" data-v="2">★</button>
+          <button type="button" class="star-btn" data-v="3">★</button>
+          <button type="button" class="star-btn" data-v="4">★</button>
+          <button type="button" class="star-btn" data-v="5">★</button>
+        </div>
+        <label class="fb-label">Comentário (opcional)</label>
+        <textarea name="comentario" class="fb-textarea" placeholder="Conte como foi sua experiência..."></textarea>
+        <button type="submit" class="fb-submit">Enviar Avaliação</button>
+      </form>
+      <a href="/" class="back-link">← Voltar para a página inicial</a>
+    </div>
+  </div>
+  <script>
+    const btns=document.querySelectorAll('.star-btn');
+    let sel=0;
+    btns.forEach(b=>{
+      b.addEventListener('click',()=>{
+        sel=+b.dataset.v;
+        document.getElementById('notaInput').value=sel;
+        btns.forEach((x,i)=>x.classList.toggle('active',i<sel));
+      });
+    });
+    document.getElementById('fbForm').addEventListener('submit',e=>{
+      if(!sel){e.preventDefault();alert('Selecione uma nota.');}
+    });
+  </script>
+</body>
+</html>
