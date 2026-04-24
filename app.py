@@ -3,7 +3,8 @@ import sqlite3
 import os
 import re
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='public')
+app.static_url_path = '/static'
 app.secret_key = 'cuiabania-energisa-senai-porto-2024'
 DATABASE = 'database.db'
 
