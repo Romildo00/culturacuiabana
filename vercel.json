@@ -10,10 +10,5 @@
       "src": "/(.*)",
       "dest": "app.py"
     }
-  ],
-  "env": {
-    "SUPABASE_URL": "https://fjownmxohtckwkcthwao.supabase.co",
-    "SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZqb3dubXhvaHRja3drY3Rod2FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTM3MjQsImV4cCI6MjA5MjU2OTcyNH0.8zKYaYBCiEC4-K7CtRJnIMsyL76R_CxJC-2Kkkrh2mc",
-    "DB_PASSWORD": "@EmillyIsa007"
-  }
+  ]
 }

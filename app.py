@@ -15,7 +15,7 @@ SUPABASE_KEY = os.environ.get('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV
 # Parse da URL de conexão do Supabase
 def get_db_connection():
     # String de conexão do Supabase
-    db_password = os.environ.get('DB_PASSWORD', '@EmillyIsa007')
+    db_password = os.environ.get('DB_PASSWORD', '@DBSENAIPROJECT007008')
     conn = psycopg2.connect(
         host="db.fjownmxohtckwkcthwao.supabase.co",
         port="5432",
