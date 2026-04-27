@@ -4,15 +4,5 @@
       "src": "app.py",
       "use": "@vercel/python"
     }
-  ],
-  "routes": [
-    {
-      "src": "/(css|js|img)/(.*)",
-      "dest": "/$1/$2"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "app.py"
-    }
   ]
 }
