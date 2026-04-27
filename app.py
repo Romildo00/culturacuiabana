@@ -4,8 +4,7 @@ import os
 import re
 from urllib.parse import urlparse
 
-app = Flask(__name__, static_folder='public')
-app.static_url_path = '/static'
+app = Flask(__name__, template_folder='templates', static_folder='public', static_url_path='')
 app.secret_key = 'cuiabania-energisa-senai-porto-2024'
 
 # Configuração do Supabase
@@ -25,7 +24,7 @@ def get_db_connection():
     )
     return conn
 
-DOMINIOS_PERMITIDOS = ["@senai.br", "@fiesc.com.br", "@estudante.senai.br"]
+DOMINIOS_PERMITIDOS = ["@senai.br", "@docente.senai.br", "@aluno.senai.br"]
 
 def get_db():
     conn = get_db_connection()
