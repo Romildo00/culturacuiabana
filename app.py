@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_file, send_from_directory
 import psycopg2
 import psycopg2.extras
 import os
@@ -13,8 +13,24 @@ except Exception as e:
 
 load_dotenv()
 
-app = Flask(__name__, template_folder='templates', static_folder='public', static_url_path='')
+app = Flask(__name__, template_folder='templates', static_folder='public', static_url_path='/static')
 app.secret_key = 'cuiabania-energisa-senai-porto-2024'
+
+# Rota customizada para servir arquivos estáticos diretamente
+@app.route('/custom.css')
+def serve_custom_css():
+    from flask import send_file
+    return send_file('public/custom.css', mimetype='text/css')
+
+@app.route('/js/<path:filename>')
+def serve_js(filename):
+    from flask import send_file
+    return send_file(f'public/js/{filename}', mimetype='application/javascript')
+
+@app.route('/static/<path:path>')
+def serve_static(path):
+    from flask import send_from_directory
+    return send_from_directory('public', path)
 
 # Handler de erro 500 customizado
 @app.errorhandler(500)
