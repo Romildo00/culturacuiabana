@@ -19,14 +19,32 @@ def get_db_connection():
         # Fallback para desenvolvimento local
         db_password = '@DBSENAIPROJECT007008'
     
-    conn = psycopg2.connect(
-        host="db.fjownmxohtckwkcthwao.supabase.co",
-        port="5432",
-        database="postgres",
-        user="postgres",
-        password=db_password
-    )
-    return conn
+    try:
+        conn = psycopg2.connect(
+            host="db.fjownmxohtckwkcthwao.supabase.co",
+            port="5432",
+            database="postgres",
+            user="postgres",
+            password=db_password,
+            connect_timeout=10
+        )
+        return conn
+    except Exception as e:
+        print(f"Erro ao conectar no banco: {e}")
+        raise
+
+# Health check para testar conexão
+@app.route('/health')
+def health():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT 1')
+        cur.close()
+        conn.close()
+        return {'status': 'ok', 'database': 'connected'}
+    except Exception as e:
+        return {'status': 'error', 'database': str(e)}, 500
 
 # Domínios permitidos - qualquer domínio é aceito
 DOMINIOS_PERMITIDOS = []  # Qualquer e-mail é permitido
