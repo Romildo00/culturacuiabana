@@ -12,6 +12,12 @@ load_dotenv()
 app = Flask(__name__, template_folder='templates', static_folder='public', static_url_path='')
 app.secret_key = 'cuiabania-energisa-senai-porto-2024'
 
+# Middleware para garantir que as respostas são renderizadas corretamente
+@app.after_request
+def after_request(response):
+    response.headers['Content-Type'] = response.headers.get('Content-Type', 'text/html; charset=utf-8')
+    return response
+
 # Configuração do Supabase
 SUPABASE_URL = os.environ.get('SUPABASE_URL', 'https://fjownmxohtckwkcthwao.supabase.co')
 SUPABASE_KEY = os.environ.get('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZqb3dubXhvaHRja3drY3Rod2FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTM3MjQsImV4cCI6MjA5MjU2OTcyNH0.8zKYaYBCiEC4-K7CtRJnIMsyL76R_CxJC-2Kkkrh2mc')
