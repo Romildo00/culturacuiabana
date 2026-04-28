@@ -1,8 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import psycopg2
+import psycopg2.extras
 import os
 import re
 from urllib.parse import urlparse
+from dotenv import load_dotenv
+from supabase import create_client, Client
+
+load_dotenv()
 
 app = Flask(__name__, template_folder='templates', static_folder='public', static_url_path='')
 app.secret_key = 'cuiabania-energisa-senai-porto-2024'
@@ -38,7 +43,7 @@ def get_db_connection():
 def health():
     try:
         conn = get_db_connection()
-        cur = conn.cursor()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur.execute('SELECT 1')
         cur.close()
         conn.close()
@@ -55,7 +60,7 @@ def get_db():
 
 def init_db():
     conn = get_db_connection()
-    cur = conn.cursor()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cur.execute('''
         CREATE TABLE IF NOT EXISTS participantes (
             id           SERIAL PRIMARY KEY,
@@ -97,7 +102,7 @@ def index():
         conn = None
         try:
             conn = get_db_connection()
-            cur = conn.cursor()
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute('SELECT * FROM participantes WHERE id = %s', (session['participante_id'],))
             participante = cur.fetchone()
             cur.close()
@@ -126,12 +131,12 @@ def registrar():
     conn = None
     try:
         conn = get_db_connection()
-        cur = conn.cursor()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur.execute(
             'INSERT INTO participantes (nome, email, turma, tipo) VALUES (%s, %s, %s, %s) RETURNING id',
             (nome, email, turma, tipo)
         )
-        pid = cur.fetchone()[0]
+        pid = cur.fetchone()['id']
         conn.commit()
         cur.close()
         session['participante_id'] = pid
@@ -143,14 +148,14 @@ def registrar():
             if conn:
                 conn.rollback()
             conn = get_db_connection()
-            cur = conn.cursor()
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute('SELECT * FROM participantes WHERE email = %s', (email,))
             p = cur.fetchone()
             cur.close()
             if p:
-                session['participante_id'] = p[0]
-                session['participante_nome'] = p[1]
-                flash(f'Bem-vindo de volta, {p[1]}!', 'sucesso')
+                session['participante_id'] = p['id']
+                session['participante_nome'] = p['nome']
+                flash(f'Bem-vindo de volta, {p["nome"]}!', 'sucesso')
             else:
                 flash('Erro ao processar cadastro.', 'erro')
         except Exception as e:
@@ -190,7 +195,7 @@ def feedback():
         conn = None
         try:
             conn = get_db_connection()
-            cur = conn.cursor()
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute(
                 'INSERT INTO feedbacks (participante_id, nota, comentario) VALUES (%s, %s, %s)',
                 (session['participante_id'], nota, comentario)
@@ -210,7 +215,7 @@ def feedback():
     conn = None
     try:
         conn = get_db_connection()
-        cur = conn.cursor()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur.execute('SELECT * FROM participantes WHERE id = %s', (session['participante_id'],))
         participante = cur.fetchone()
         cur.close()
