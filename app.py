@@ -5,12 +5,21 @@ import os
 import re
 from urllib.parse import urlparse
 from dotenv import load_dotenv
-from supabase import create_client, Client
+
+try:
+    from supabase import create_client, Client
+except Exception as e:
+    print(f"Aviso: Não foi possível importar Supabase: {e}")
 
 load_dotenv()
 
 app = Flask(__name__, template_folder='templates', static_folder='public', static_url_path='')
 app.secret_key = 'cuiabania-energisa-senai-porto-2024'
+
+# Handler de erro 500 customizado
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('index.html', logado=False, participante=None), 500
 
 # Middleware para garantir que as respostas são renderizadas corretamente
 @app.after_request
@@ -37,7 +46,8 @@ def get_db_connection():
             database="postgres",
             user="postgres",
             password=db_password,
-            connect_timeout=10
+            connect_timeout=10,
+            sslmode='require'
         )
         return conn
     except Exception as e:
