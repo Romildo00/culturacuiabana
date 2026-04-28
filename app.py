@@ -24,7 +24,19 @@ def internal_error(error):
 # Middleware para garantir que as respostas são renderizadas corretamente
 @app.after_request
 def after_request(response):
-    response.headers['Content-Type'] = response.headers.get('Content-Type', 'text/html; charset=utf-8')
+    # Definir Content-Type baseado na extensão do arquivo
+    if response.mimetype == 'application/octet-stream':
+        path = request.path.lower()
+        if path.endswith('.js'):
+            response.headers['Content-Type'] = 'application/javascript; charset=utf-8'
+        elif path.endswith('.css'):
+            response.headers['Content-Type'] = 'text/css; charset=utf-8'
+        elif path.endswith('.html'):
+            response.headers['Content-Type'] = 'text/html; charset=utf-8'
+        elif path.endswith('.json'):
+            response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    elif not response.headers.get('Content-Type'):
+        response.headers['Content-Type'] = 'text/html; charset=utf-8'
     return response
 
 # Configuração do Supabase
