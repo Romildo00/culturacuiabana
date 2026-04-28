@@ -1,0 +1,11 @@
+{
+  "builds": [
+    {
+      "src": "app.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "env": {
+    "DB_PASSWORD": "@DBSENAIPROJECT007008"
+  }
+}

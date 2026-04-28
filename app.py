@@ -13,8 +13,12 @@ SUPABASE_KEY = os.environ.get('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV
 
 # Parse da URL de conexão do Supabase
 def get_db_connection():
-    # String de conexão do Supabase
-    db_password = os.environ.get('DB_PASSWORD', '@DBSENAIPROJECT007008')
+    # String de conexão do Supabase - usa variáveis de ambiente ou valores padrão
+    db_password = os.environ.get('DB_PASSWORD')
+    if not db_password:
+        # Fallback para desenvolvimento local
+        db_password = '@DBSENAIPROJECT007008'
+    
     conn = psycopg2.connect(
         host="db.fjownmxohtckwkcthwao.supabase.co",
         port="5432",
@@ -113,18 +117,23 @@ def registrar():
         flash(f'Bem-vindo, {nome}! Sua inscrição foi confirmada.', 'sucesso')
     except psycopg2.IntegrityError:
         # E-mail já existe — faz login direto
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute('SELECT * FROM participantes WHERE email = %s', (email,))
-        p = cur.fetchone()
-        cur.close()
-        conn.close()
-        if p:
-            session['participante_id'] = p[0]
-            session['participante_nome'] = p[1]
-            flash(f'Bem-vindo de volta, {p[1]}!', 'sucesso')
-        else:
-            flash('Erro ao processar cadastro.', 'erro')
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute('SELECT * FROM participantes WHERE email = %s', (email,))
+            p = cur.fetchone()
+            cur.close()
+            conn.close()
+            if p:
+                session['participante_id'] = p[0]
+                session['participante_nome'] = p[1]
+                flash(f'Bem-vindo de volta, {p[1]}!', 'sucesso')
+            else:
+                flash('Erro ao processar cadastro.', 'erro')
+        except Exception as e:
+            flash(f'Erro ao fazer login: {str(e)}', 'erro')
+    except Exception as e:
+        flash(f'Erro ao conectar com banco: {str(e)}', 'erro')
 
     return redirect(url_for('index'))
 
