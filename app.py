@@ -51,6 +51,10 @@ def health():
     except Exception as e:
         return {'status': 'error', 'database': str(e)}, 500
 
+# Remover init_db automático - será feito sob demanda
+# def init_db():
+#     ... (código mantido mas não executa automaticamente)
+
 # Domínios permitidos - qualquer domínio é aceito
 DOMINIOS_PERMITIDOS = []  # Qualquer e-mail é permitido
 
