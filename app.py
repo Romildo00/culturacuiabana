@@ -28,7 +28,8 @@ def get_db_connection():
     )
     return conn
 
-DOMINIOS_PERMITIDOS = ["@senai.br", "@docente.senai.br", "@aluno.senai.br"]
+# Domínios permitidos - qualquer domínio é aceito
+DOMINIOS_PERMITIDOS = []  # Qualquer e-mail é permitido
 
 def get_db():
     conn = get_db_connection()
@@ -62,7 +63,8 @@ def init_db():
     conn.close()
 
 def validar_email(email):
-    return any(email.lower().endswith(d) for d in DOMINIOS_PERMITIDOS)
+    # Qualquer e-mail é permitido
+    return True
 
 def usuario_logado():
     return session.get('participante_id') is not None
@@ -74,12 +76,18 @@ def index():
     logado = usuario_logado()
     participante = None
     if logado:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute('SELECT * FROM participantes WHERE id = %s', (session['participante_id'],))
-        participante = cur.fetchone()
-        cur.close()
-        conn.close()
+        conn = None
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute('SELECT * FROM participantes WHERE id = %s', (session['participante_id'],))
+            participante = cur.fetchone()
+            cur.close()
+        except Exception as e:
+            flash(f'Erro ao carregar dados: {str(e)}', 'erro')
+        finally:
+            if conn:
+                conn.close()
     return render_template('index.html', logado=logado, participante=participante)
 
 @app.route('/registrar', methods=['POST'])
@@ -93,14 +101,11 @@ def registrar():
         flash('Preencha todos os campos.', 'erro')
         return redirect(url_for('index'))
 
-    if not validar_email(email):
-        flash('E-mail não permitido. Use domínio do Senai.', 'erro')
-        return redirect(url_for('index'))
-
     if tipo not in ['aluno', 'professor']:
         flash('Tipo inválido.', 'erro')
         return redirect(url_for('index'))
 
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -111,19 +116,19 @@ def registrar():
         pid = cur.fetchone()[0]
         conn.commit()
         cur.close()
-        conn.close()
         session['participante_id'] = pid
         session['participante_nome'] = nome
         flash(f'Bem-vindo, {nome}! Sua inscrição foi confirmada.', 'sucesso')
     except psycopg2.IntegrityError:
         # E-mail já existe — faz login direto
         try:
+            if conn:
+                conn.rollback()
             conn = get_db_connection()
             cur = conn.cursor()
             cur.execute('SELECT * FROM participantes WHERE email = %s', (email,))
             p = cur.fetchone()
             cur.close()
-            conn.close()
             if p:
                 session['participante_id'] = p[0]
                 session['participante_nome'] = p[1]
@@ -131,9 +136,16 @@ def registrar():
             else:
                 flash('Erro ao processar cadastro.', 'erro')
         except Exception as e:
+            if conn:
+                conn.rollback()
             flash(f'Erro ao fazer login: {str(e)}', 'erro')
     except Exception as e:
+        if conn:
+            conn.rollback()
         flash(f'Erro ao conectar com banco: {str(e)}', 'erro')
+    finally:
+        if conn:
+            conn.close()
 
     return redirect(url_for('index'))
 
@@ -157,24 +169,39 @@ def feedback():
             flash('Selecione uma nota.', 'erro')
             return redirect(url_for('feedback'))
 
+        conn = None
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute(
+                'INSERT INTO feedbacks (participante_id, nota, comentario) VALUES (%s, %s, %s)',
+                (session['participante_id'], nota, comentario)
+            )
+            conn.commit()
+            cur.close()
+            flash('Obrigado pelo seu feedback!', 'sucesso')
+            return redirect(url_for('index'))
+        except Exception as e:
+            if conn:
+                conn.rollback()
+            flash(f'Erro ao enviar feedback: {str(e)}', 'erro')
+        finally:
+            if conn:
+                conn.close()
+
+    conn = None
+    try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute(
-            'INSERT INTO feedbacks (participante_id, nota, comentario) VALUES (%s, %s, %s)',
-            (session['participante_id'], nota, comentario)
-        )
-        conn.commit()
+        cur.execute('SELECT * FROM participantes WHERE id = %s', (session['participante_id'],))
+        participante = cur.fetchone()
         cur.close()
-        conn.close()
-        flash('Obrigado pelo seu feedback!', 'sucesso')
-        return redirect(url_for('index'))
-
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('SELECT * FROM participantes WHERE id = %s', (session['participante_id'],))
-    participante = cur.fetchone()
-    cur.close()
-    conn.close()
+    except Exception as e:
+        flash(f'Erro ao carregar dados: {str(e)}', 'erro')
+        participante = None
+    finally:
+        if conn:
+            conn.close()
     return render_template('feedback.html', participante=participante)
 
 if __name__ == '__main__':
