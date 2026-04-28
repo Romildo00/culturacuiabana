@@ -228,5 +228,12 @@ def feedback():
     return render_template('feedback.html', participante=participante)
 
 if __name__ == '__main__':
-    init_db()
-    app.run(debug=True)
+    try:
+        init_db()
+    except:
+        pass  # Tabelas já existem ou erro de conexão
+    app.run(
+        host='0.0.0.0',
+        port=int(os.environ.get('PORT', 5000)),
+        debug=False
+    )
