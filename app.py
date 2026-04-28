@@ -4,7 +4,7 @@ import os
 import re
 from urllib.parse import urlparse
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__, template_folder='templates', static_folder='public', static_url_path='')
 app.secret_key = 'cuiabania-energisa-senai-porto-2024'
 
 # Configuração do Supabase
