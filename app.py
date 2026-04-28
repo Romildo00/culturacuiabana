@@ -1,16 +1,59 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_file, send_from_directory
 import psycopg2
 import psycopg2.extras
 import os
 import re
 from urllib.parse import urlparse
 from dotenv import load_dotenv
-from supabase import create_client, Client
+
+try:
+    from supabase import create_client, Client
+except Exception as e:
+    print(f"Aviso: Não foi possível importar Supabase: {e}")
 
 load_dotenv()
 
-app = Flask(__name__, template_folder='templates', static_folder='public', static_url_path='')
+app = Flask(__name__, template_folder='templates', static_folder='public', static_url_path='/static')
 app.secret_key = 'cuiabania-energisa-senai-porto-2024'
+
+# Rota customizada para servir arquivos estáticos diretamente
+@app.route('/custom.css')
+def serve_custom_css():
+    from flask import send_file
+    return send_file('public/custom.css', mimetype='text/css')
+
+@app.route('/js/<path:filename>')
+def serve_js(filename):
+    from flask import send_file
+    return send_file(f'public/js/{filename}', mimetype='application/javascript')
+
+@app.route('/static/<path:path>')
+def serve_static(path):
+    from flask import send_from_directory
+    return send_from_directory('public', path)
+
+# Handler de erro 500 customizado
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('index.html', logado=False, participante=None), 500
+
+# Middleware para garantir que as respostas são renderizadas corretamente
+@app.after_request
+def after_request(response):
+    # Definir Content-Type baseado na extensão do arquivo
+    if response.mimetype == 'application/octet-stream':
+        path = request.path.lower()
+        if path.endswith('.js'):
+            response.headers['Content-Type'] = 'application/javascript; charset=utf-8'
+        elif path.endswith('.css'):
+            response.headers['Content-Type'] = 'text/css; charset=utf-8'
+        elif path.endswith('.html'):
+            response.headers['Content-Type'] = 'text/html; charset=utf-8'
+        elif path.endswith('.json'):
+            response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    elif not response.headers.get('Content-Type'):
+        response.headers['Content-Type'] = 'text/html; charset=utf-8'
+    return response
 
 # Configuração do Supabase
 SUPABASE_URL = os.environ.get('SUPABASE_URL', 'https://fjownmxohtckwkcthwao.supabase.co')
@@ -31,7 +74,8 @@ def get_db_connection():
             database="postgres",
             user="postgres",
             password=db_password,
-            connect_timeout=10
+            connect_timeout=10,
+            sslmode='require'
         )
         return conn
     except Exception as e:
@@ -50,6 +94,10 @@ def health():
         return {'status': 'ok', 'database': 'connected'}
     except Exception as e:
         return {'status': 'error', 'database': str(e)}, 500
+
+# Remover init_db automático - será feito sob demanda
+# def init_db():
+#     ... (código mantido mas não executa automaticamente)
 
 # Domínios permitidos - qualquer domínio é aceito
 DOMINIOS_PERMITIDOS = []  # Qualquer e-mail é permitido
@@ -228,5 +276,12 @@ def feedback():
     return render_template('feedback.html', participante=participante)
 
 if __name__ == '__main__':
-    init_db()
-    app.run(debug=True)
+    try:
+        init_db()
+    except:
+        pass  # Tabelas já existem ou erro de conexão
+    app.run(
+        host='0.0.0.0',
+        port=int(os.environ.get('PORT', 5000)),
+        debug=False
+    )
