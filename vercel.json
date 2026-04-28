@@ -1,11 +1,14 @@
 {
   "builds": [
     {
-      "src": "app.py",
+      "src": "api/index.py",
       "use": "@vercel/python"
     }
   ],
-  "env": {
-    "PYTHONUNBUFFERED": "1"
-  }
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.py"
+    }
+  ]
 }
